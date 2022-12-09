@@ -19,9 +19,9 @@
     <Label fx:id="welcomeText"/>
 
     <HBox>
-        <padding> <Insets left="80"> </Insets> </padding> <Button text="generate maze" onAction="#onLoadButtonClick"/>
+        <padding> <Insets left="450"> </Insets> </padding> <Button text="generate maze" onAction="#onLoadButtonClick"/>
         <Button text="solve maze" onAction="#onHelloButtonClick"/>
     </HBox>
 
-    <Canvas fx:id="canmvas" height="200" width="200"> </Canvas>
+    <Canvas fx:id="canmvas" height="700" width="700"> </Canvas>
 </VBox>

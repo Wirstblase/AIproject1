@@ -114,10 +114,13 @@ public class HelloController {
         // Add the starting node to the unexplored queue
         unexplored.add(new Node(startX, startY, 0, 0, null));
 
+        int memoryLimit = 1000;
+        int steps = 0;
         // Loop until the unexplored queue is empty
-        while (!unexplored.isEmpty()) {
+        while (!unexplored.isEmpty() && steps < memoryLimit) {
             // Get the node with the lowest estimated total cost
             Node current = unexplored.poll();
+            steps++;
 
             // Check if we have reached the end of the maze
             if (maze.getMaze()[current.x][current.y] == -2) {
@@ -354,7 +357,7 @@ public class HelloController {
     @FXML
     protected void onLoadButtonClick() {
         welcomeText.setText("maze generated");
-        maze = new Maze(new int[20][20]);
+        maze = new Maze(new int[30][30]);
         maze = populateMaze(maze);
 
         showMaze(canmvas, maze.getMaze());
