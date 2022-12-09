@@ -186,16 +186,16 @@ public class HelloController {
             current = unexplored.poll();
 
             // Check if the current position is the same as the previous position
-// If it is, this means that the algorithm has reached a dead end
-// and cannot move any further, so break out of the loop
+        // If it is, this means that the algorithm has reached a dead end
+        // and cannot move any further, so break out of the loop
             if (current.previous != null && current.x == current.previous.x && current.y == current.previous.y) {
                 break;
             }
 
-// Add the current position to the solution
+        // Add the current position to the solution
             solution[current.x][current.y] = 3;
 
-// Check if the current position is the end point
+        // Check if the current position is the end point
             if (current.x == maze.getEndX() && current.y == maze.getEndY()) {
                 // If it is, construct the solution path by following the previous
                 // nodes back to the starting point
@@ -206,7 +206,7 @@ public class HelloController {
                 break;
             }
 
-// Add the current node's neighbors to the unexplored queue
+        // Add the current node's neighbors to the unexplored queue
             addNeighborsToUnexplored(maze, unexplored, current);
         }
         return solution;
