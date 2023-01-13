@@ -88,132 +88,6 @@ public class HelloController {
         return Math.abs(x - endX) + Math.abs(y - endY);
     }
 
-    public static int[][] solveMaze(Maze maze) {
-        // Get the dimensions of the maze
-        int height = maze.getMaze().length;
-        int width = maze.getMaze()[0].length;
-
-        // Create a 2D array to store the solution
-        int[][] solution = new int[height][width];
-
-        // Create a priority queue to store the unexplored nodes
-        PriorityQueue<Node> unexplored = new PriorityQueue<>();
-
-        // Find the starting position in the maze
-        int startX = 0;
-        int startY = 0;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (maze.getMaze()[i][j] == -1) {
-                    startX = i;
-                    startY = j;
-                }
-            }
-        }
-
-        // Add the starting node to the unexplored queue
-        unexplored.add(new Node(startX, startY, 0, 0, null));
-
-        int memoryLimit = 1000;
-        int steps = 0;
-        // Loop until the unexplored queue is empty
-        while (!unexplored.isEmpty() && steps < memoryLimit) {
-            // Get the node with the lowest estimated total cost
-            Node current = unexplored.poll();
-            steps++;
-
-            // Check if we have reached the end of the maze
-            if (maze.getMaze()[current.x][current.y] == -2) {
-                // If so, construct the solution path by following the
-                // chain of parent nodes back to the starting position
-                while (current.parent != null) {
-                    solution[current.x][current.y] = 3;
-                    current = current.parent;
-                }
-                break;
-            }
-
-            // Otherwise, add the current node's neighbors to the unexplored queue
-            addNeighbors(current, maze, unexplored);
-        }
-
-        // Return the solution
-        return solution;
-    }
-
-    /*// Method to add a node's neighbors to the unexplored queue
-    public static void addNeighborsToUnexplored(Maze maze, PriorityQueue<Node> unexplored, Node current) {
-        // Get the coordinates of the current node's neighbors
-        int[] neighborsX = {current.x - 1, current.x + 1, current.x, current.x};
-        int[] neighborsY = {current.y, current.y, current.y - 1, current.y + 1};
-
-        // Loop through the neighbors
-        for (int i = 0; i < 4; i++) {
-            // Get the coordinates of the current neighbor
-            int x = neighborsX[i];
-            int y = neighborsY[i];
-
-            // Check if the current neighbor is within the maze bounds
-            // and not an obstacle
-            if (x >= 0 && x < maze.getMaze().length && y >= 0 && y < maze.getMaze()[0].length && maze.getMaze()[x][y] != 1) {
-                // If it is, add it to the unexplored queue if it hasn't been explored yet
-                if (!unexplored.contains(new Node(x, y))) {
-                    unexplored.add(new Node(x, y, current.cost + 1, getEstimatedTotalCost(x, y, maze), current));
-
-                }
-            }
-        }
-    }
-
-    // Solve the maze using the A* algorithm
-    public static int[][] solveMaze2(Maze maze) {
-        // Get the dimensions of the maze
-        int height = maze.getMaze().length;
-        int width = maze.getMaze()[0].length;
-
-        // Create a 2D array to store the solution
-        int[][] solution = new int[height][width];
-
-        // Create a priority queue to store the unexplored nodes
-        PriorityQueue<Node> unexplored = new PriorityQueue<>();
-
-        // Add the starting point to the unexplored queue
-        unexplored.add(new Node(maze.getStartX(), maze.getStartY(), 0, getEstimatedTotalCost(maze.getStartX(), maze.getStartY(), maze), null));
-
-        // Create a Node to store the current position
-        Node current = null;
-
-        // Loop until the end point is reached or the queue is empty
-        while (!unexplored.isEmpty()) {
-            // Get the node with the lowest estimated total cost from the queue
-            current = unexplored.poll();
-
-            // Check if the current position is the same as the previous position
-        // If it is, this means that the algorithm has reached a dead end
-        // and cannot move any further, so break out of the loop
-            if (current.previous != null && current.x == current.previous.x && current.y == current.previous.y) {
-                break;
-            }
-
-        // Add the current position to the solution
-            solution[current.x][current.y] = 3;
-
-        // Check if the current position is the end point
-            if (current.x == maze.getEndX() && current.y == maze.getEndY()) {
-                // If it is, construct the solution path by following the previous
-                // nodes back to the starting point
-                while (current.previous != null) {
-                    current = current.previous;
-                    solution[current.x][current.y] = 3;
-                }
-                break;
-            }
-
-        // Add the current node's neighbors to the unexplored queue
-            addNeighborsToUnexplored(maze, unexplored, current);
-        }
-        return solution;
-    }*/
 
     // Helper method to add a node's neighbors to the unexplored queue
     private static void addNeighbors(Node node, Maze maze, PriorityQueue<Node> unexplored) {
@@ -237,6 +111,7 @@ public class HelloController {
             unexplored.add(new Node(node.x, node.y + 1, node.cost + 1, getEstimatedTotalCost(node.x, node.y + 1, maze), node));
         }
     }
+
 
     // Method to print a maze to the console
     public static void printMaze(int[][] maze) {
@@ -274,7 +149,7 @@ public class HelloController {
     }
 
     // Method to merge the populated maze and the solution into a single array
-    public static int[][] mergeMazeAndSolution(Maze maze, int[][] solution) {
+    public static int[][] mergeMazeAndSolution(Maze maze, int[][] solution, int[][] explored) {
         // Get the dimensions of the maze
         int height = maze.getMaze().length;
         int width = maze.getMaze()[0].length;
@@ -291,6 +166,8 @@ public class HelloController {
                 } else if (maze.getMaze()[i][j] == -1) {
                     mergedMaze[i][j] = 3;
                     //sets the start point to be blue aswell
+                } else if(explored[i][j] == 4){
+                    mergedMaze[i][j] = 4;
                 }
                 // Otherwise, set the merged maze value to the solution value
                 else {
@@ -331,6 +208,11 @@ public class HelloController {
                     gc.setFill(Color.BLACK);
                     gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 }
+
+                else if(maze[i][j] == 4){
+                    gc.setFill(Color.RED);
+                    gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                }
                 // If the current cell is part of the solution path, draw a blue rectangle
                 else if (maze[i][j] == 3) {
                     gc.setFill(Color.BLUE);
@@ -366,10 +248,18 @@ public class HelloController {
 
     @FXML
     protected void onHelloButtonClick() {
-        solution = solveMaze(maze);
+       //solution = solveMaze(maze);
+        AStarMazeSolver solver = new AStarMazeSolver(maze.getMaze(), 30, maze.findEnd());
+
+        int [][] explored = solver.solve();
+
+        //solver.markPath(solver.finalState);
+        //solution = solver.getMaze();
+        //showMaze(canmvas, explored);
+        //printMaze(solution);
 
         welcomeText.setText("maze solved");
-        solvedMaze = mergeMazeAndSolution(maze, solution);
+        solvedMaze = mergeMazeAndSolution(maze, explored, explored);
 
         showMaze(canmvas, solvedMaze);
     }

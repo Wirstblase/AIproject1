@@ -19,6 +19,17 @@ public class Maze {
         maze[x][y] = value;
     }
 
+    public State findEnd() {
+        for (int i = 0; i < maze.length; i++) {
+            for (int j = 0; j < maze[0].length; j++) {
+                if (maze[i][j] == -2) {
+                    return new State(i, j);
+                }
+            }
+        }
+        return null;
+    }
+
     // Method that prints the maze to the console
     public void printMaze() {
         for (int[] row : maze) {
