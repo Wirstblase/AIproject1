@@ -290,7 +290,7 @@ public class HelloController {
                 }
                 // If the current cell is part of the solution path, draw a blue rectangle
                 else if (maze[i][j] == 4) {
-                    gc.setFill(Color.RED);
+                    gc.setFill(Color.GRAY);
                     gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 } else if (maze[i][j] == -1) {
                     gc.setFill(Color.BLUE);
