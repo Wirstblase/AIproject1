@@ -19,6 +19,15 @@ public class Maze {
         maze[x][y] = value;
     }
 
+    //method that sets every cell to 0
+    public void clearMaze() {
+        for (int i = 0; i < maze.length; i++) {
+            for (int j = 0; j < maze[i].length; j++) {
+                maze[i][j] = 0;
+            }
+        }
+    }
+
     public State findEnd() {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {

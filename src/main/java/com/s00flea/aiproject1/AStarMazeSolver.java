@@ -8,6 +8,9 @@ public class AStarMazeSolver {
     private Queue<State> visited;
     private int maxStates;
 
+    public int stepsLimit = 10000;
+    public int steps;
+
     public State finalState;
 
     public AStarMazeSolver(int[][] maze, int maxStates, State goal) {
@@ -26,9 +29,12 @@ public class AStarMazeSolver {
         // Add the starting point to the queue
         queue.offer(start);
         // While the queue is not empty
-        while (!queue.isEmpty()) {
+
+        steps = 0;
+        while (!queue.isEmpty() && steps < stepsLimit) {
             // Get the state with the highest priority
             State current = queue.poll();
+            steps++;
             // Mark the current state as explored
             int x = current.getX();
             int y = current.getY();

@@ -65,6 +65,60 @@ public class HelloController {
         return maze;
     }
 
+    public static int[][] solveMaze(Maze maze) {
+        // Get the dimensions of the maze
+        int height = maze.getMaze().length;
+        int width = maze.getMaze()[0].length;
+
+        // Create a 2D array to store the solution
+        int[][] solution = new int[height][width];
+
+        // Create a priority queue to store the unexplored nodes
+        PriorityQueue<Node> unexplored = new PriorityQueue<>();
+
+        // Find the starting position in the maze
+        int startX = 0;
+        int startY = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (maze.getMaze()[i][j] == -1) {
+                    startX = i;
+                    startY = j;
+                }
+            }
+        }
+
+        // Add the starting node to the unexplored queue
+        unexplored.add(new Node(startX, startY, 0, 0, null));
+
+        //added a steps limit so that it doesn't get stuck
+        int stepsLimit = 10000;
+        int steps = 0;
+        // Loop until the unexplored queue is empty
+        while (!unexplored.isEmpty() && steps < stepsLimit) {
+            // Get the node with the lowest estimated total cost
+            Node current = unexplored.poll();
+            steps++;
+
+            // Check if we have reached the end of the maze
+            if (maze.getMaze()[current.x][current.y] == -2) {
+                // If so, construct the solution path by following the
+                // chain of parent nodes back to the starting position
+                while (current.parent != null) {
+                    solution[current.x][current.y] = 3;
+                    current = current.parent;
+                }
+                break;
+            }
+
+            // Otherwise, add the current node's neighbors to the unexplored queue
+            addNeighbors(current, maze, unexplored);
+        }
+
+        // Return the solution
+        return solution;
+    }
+
 
     // Helper method to calculate the estimated total cost of a node
     private static int getEstimatedTotalCost(int x, int y, Maze maze) {
@@ -160,19 +214,40 @@ public class HelloController {
         // Loop through the maze and the solution
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                // If the current position is an obstacle, set the merged maze value to "1"
+                /*// If the current position is an obstacle, set the merged maze value to "1"
                 if (maze.getMaze()[i][j] == 1) {
                     mergedMaze[i][j] = 1;
                 } else if (maze.getMaze()[i][j] == -1) {
                     mergedMaze[i][j] = 3;
                     //sets the start point to be blue aswell
-                } else if(explored[i][j] == 4){
-                    mergedMaze[i][j] = 4;
+                } else if(explored[i][j] == 3){
+                    mergedMaze[i][j] = 3;
+                } else if(solution[i][j] == 4){
+                    mergedMaze[i][j] = 3;
                 }
                 // Otherwise, set the merged maze value to the solution value
                 else {
                     mergedMaze[i][j] = solution[i][j];
+                }*/
+
+                if(maze.getMaze()[i][j] == 1){
+                    mergedMaze[i][j] = 1;
+                } else {
+                    mergedMaze[i][j] = 0;
                 }
+
+                if(explored[i][j] == 4){
+                    mergedMaze[i][j] = 4;
+                }
+
+                if(maze.getMaze()[i][j] == -1){
+                    mergedMaze[i][j] = 3;
+                }
+
+                 if(solution[i][j] == 3){
+                    mergedMaze[i][j] = 3;
+                }
+
             }
         }
 
@@ -209,13 +284,13 @@ public class HelloController {
                     gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 }
 
-                else if(maze[i][j] == 4){
-                    gc.setFill(Color.RED);
+                else if(maze[i][j] == 3){
+                    gc.setFill(Color.BLUE);
                     gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 }
                 // If the current cell is part of the solution path, draw a blue rectangle
-                else if (maze[i][j] == 3) {
-                    gc.setFill(Color.BLUE);
+                else if (maze[i][j] == 4) {
+                    gc.setFill(Color.RED);
                     gc.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 } else if (maze[i][j] == -1) {
                     gc.setFill(Color.BLUE);
@@ -233,6 +308,40 @@ public class HelloController {
         }
     }
 
+    //method that takes two int[][] and counts how many times the value 3 overlaps between them
+    public static int countOverlap(int[][] explored, int[][] solution){
+        int count = 0;
+        for(int i = 0; i < explored.length; i++){
+            for(int j = 0; j < explored[0].length; j++){
+                if(explored[i][j] == 4 && solution[i][j] == 3){
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    int countSolutionLength(int[][] solution){
+        int count = 0;
+        for(int i = 0; i < solution.length; i++){
+            for(int j = 0; j < solution[0].length; j++){
+                if(solution[i][j] == 3){
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    //method to set all values of int[][] to 0
+    public static void resetArray(int[][] array){
+        for(int i = 0; i < array.length; i++){
+            for(int j = 0; j < array[0].length; j++){
+                array[i][j] = 0;
+            }
+        }
+    }
+
     @FXML
     private Label welcomeText;
 
@@ -240,7 +349,30 @@ public class HelloController {
     protected void onLoadButtonClick() {
         welcomeText.setText("maze generated");
         maze = new Maze(new int[30][30]);
-        maze = populateMaze(maze);
+
+        int overlap = 0;
+        int count = 0;
+
+        while(count < 2) {
+        while(overlap+1 != count){
+
+            maze.clearMaze();
+
+            maze = populateMaze(maze);
+
+            int [][] sol = solveMaze(maze);
+
+            AStarMazeSolver solver = new AStarMazeSolver(maze.getMaze(), 20, maze.findEnd());
+            int [][] expl = solver.solve();
+
+            count = countSolutionLength(sol);
+            overlap = countOverlap(expl, sol);
+
+            //System.out.println(overlap+1);
+            //System.out.println(count);
+
+        }
+        }
 
         showMaze(canmvas, maze.getMaze());
 
@@ -248,8 +380,8 @@ public class HelloController {
 
     @FXML
     protected void onHelloButtonClick() {
-       //solution = solveMaze(maze);
-        AStarMazeSolver solver = new AStarMazeSolver(maze.getMaze(), 30, maze.findEnd());
+        solution = solveMaze(maze);
+        AStarMazeSolver solver = new AStarMazeSolver(maze.getMaze(), 20, maze.findEnd());
 
         int [][] explored = solver.solve();
 
@@ -259,7 +391,9 @@ public class HelloController {
         //printMaze(solution);
 
         welcomeText.setText("maze solved");
-        solvedMaze = mergeMazeAndSolution(maze, explored, explored);
+        //printMaze(solution);
+
+        solvedMaze = mergeMazeAndSolution(maze, solution, explored);
 
         showMaze(canmvas, solvedMaze);
     }
